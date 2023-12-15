@@ -1,5 +1,7 @@
 # Efficient Edge AI for Robotics and Earth Observation
 
+![image](https://github.com/ISL-INTELLIGENT-SYSTEMS-LAB/IMPACT-Edge_AI/assets/78773029/441dffbc-9548-49e5-b507-1602c9401f39)
+
 ### Mission Overview
 This repository is the central hub for the Intelligent Systems Laboratory (ISL) research team's efforts in advancing the field of autonomous navigation and exploration. Our mission is to adapt and enhance object detection and semantic segmentation algorithms specifically tailored for integration with cutting-edge hardware platforms.
 
@@ -15,12 +17,7 @@ We encourage collaboration and contributions from fellow researchers, developers
 ### Stay Updated
 Keep an eye on this space for updates, progress reports, and insights into our development process. Together, we're charting a course for smarter, more capable autonomous systems.
 
-<br>
-
-![image](https://github.com/ISL-INTELLIGENT-SYSTEMS-LAB/IMPACT-Edge_AI/assets/78773029/441dffbc-9548-49e5-b507-1602c9401f39)
-
-
-## Task Organization
+# Task Organization
 <table>
 <tr>
 <th>Ground</th>
