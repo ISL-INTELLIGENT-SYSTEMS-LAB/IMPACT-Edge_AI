@@ -1,19 +1,22 @@
---- environment requirements (do this first) ---
+# Environment requirements
 python3.8
 pip 23.2.1
 mvenv (to create, activate, and deactivate the virtual environment)
 python3.8-dev (obtained by sudo apt-get install python3.8-dev)
 CUDA 10.2
---- for data_collection.py ---
+
+## data_collection_client.py requirements
 Cython
 scikit-build
 numpy
 pandas
 opencv-contrib-python
 pyzed (ZED Python API, run get_python_api.py located in /usr/local/zed)
---- for network_relation.py ---
+
+## network_relation.py requirements
 matplotlib
---- for utils.py ---
+
+## utils.py requirements
 torch->dependency for pytorch3d
 torchvision->dependency for pytorch3d
 torchaudio->dependency for pytorch3d
