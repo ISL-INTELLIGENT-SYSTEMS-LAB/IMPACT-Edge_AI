@@ -1,6 +1,6 @@
 # Environment requirements
-1) python3.8
-2) pip 23.2.1
+-python3.8
+-pip 23.2.1
 mvenv (to create, activate, and deactivate the virtual environment)
 python3.8-dev (obtained by sudo apt-get install python3.8-dev)
 CUDA 10.2
