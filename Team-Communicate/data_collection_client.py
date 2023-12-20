@@ -7,12 +7,22 @@ import time
 import math
 import threading
 import signal
-import socket #added
-import pickle #added
+from datetime import datetime
+import socket
+import pickle 
 
 # Define the directory path and experiment name
 DIR_PATH = "/home/santino/Desktop/collected_data"
-EXPERIMENT = 'test_1'
+
+# Get the current date and time
+now = datetime.now()
+
+# Format the date and time as strings
+date_str = now.strftime("%Y-%m-%d")
+time_str = now.strftime("%H-%M-%S")
+
+# Use the date as the experiment name
+EXPERIMENT = f'experiment_{date_str}'
 
 # Create a new directory path that includes the experiment name
 EXPERIMENT_DIR_PATH = os.path.join(DIR_PATH, EXPERIMENT)
@@ -21,11 +31,19 @@ EXPERIMENT_DIR_PATH = os.path.join(DIR_PATH, EXPERIMENT)
 if not os.path.exists(EXPERIMENT_DIR_PATH):
     os.makedirs(EXPERIMENT_DIR_PATH)
 
+# Create a new directory for the current time
+TIME_DIR_PATH = os.path.join(EXPERIMENT_DIR_PATH, time_str)
+
+# Check if the directory exists, if not, create it
+if not os.path.exists(TIME_DIR_PATH):
+    os.makedirs(TIME_DIR_PATH)
+
 # Function to format the filename based on translation and rotation values
 def format_filename(trans, rot):
     global file_counter
-    #added and incrementer to the filename
-    filename = f'{EXPERIMENT_DIR_PATH}/collection-{file_counter}_pos_{trans[0]: .2f}-{trans[1]: .2f}-{trans[2]: .2f}+rot_{rot[0]: .2f}-{rot[1]: .2f}-{rot[2]: .2f}'
+    # Add a timestamp and incrementer to the filename
+    timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+    filename = f'{TIME_DIR_PATH}/collection-{file_counter}_{timestamp}_pos_{trans[0]: .2f}-{trans[1]: .2f}-{trans[2]: .2f}+rot_{rot[0]: .2f}-{rot[1]: .2f}-{rot[2]: .2f}'
     file_counter += 1
     return filename
 
@@ -196,4 +214,3 @@ def main():
 # Run the main function when the script is executed
 if __name__ == "__main__":
     main()
-

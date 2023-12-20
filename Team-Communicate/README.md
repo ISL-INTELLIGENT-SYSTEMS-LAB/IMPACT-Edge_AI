@@ -24,5 +24,3 @@
 - iopath->dependency for pytorch3d
 - pytorch3d (pip install "git+https://github.com/facebookresearch/pytorch3d.git")
 - scipy
-
-
