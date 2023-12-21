@@ -12,7 +12,7 @@ import socket
 import pickle 
 
 # Define the directory path and experiment name
-DIR_PATH = "/home/santino/Desktop/collected_data"
+DIR_PATH = "/home/jetson/impact_AI/collected_data"
 
 # Get the current date and time
 now = datetime.now()
