@@ -1,0 +1,11 @@
+The main ideas behind this code are:
+
+Server Setup: The script sets up a server that listens for client connections on a specified address and port.
+
+Multithreading: For each client that connects, the script starts a new thread to handle the connection. This allows the server to handle multiple clients simultaneously.
+
+Data Reception: The script receives data from the client in chunks and concatenates them into a byte string.
+
+Data Processing: The script processes the received data by decoding it, splitting it into a filename and a JSON string, converting the JSON string into a pandas DataFrame, and saving the DataFrame to a CSV file.
+
+Directory Management: If the directory where the CSV files are to be saved does not exist, the script creates it.
