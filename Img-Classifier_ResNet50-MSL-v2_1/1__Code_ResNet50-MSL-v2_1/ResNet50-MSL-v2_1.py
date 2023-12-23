@@ -1,3 +1,4 @@
+
 ##############################################################################################################################################################################
 """
 ██████╗ ███████╗███████╗███╗   ██╗███████╗████████╗███████╗ ██████╗       ███╗   ███╗███████╗██╗      ██╗   ██╗██████╗    ██╗
@@ -19,6 +20,11 @@ function trains the model using the provided data loaders, criterion, optimizer,
 and save frequency for model checkpoints.
 
 Note: The code assumes that the necessary libraries (torch, torchvision, numpy, PIL, seaborn, matplotlib) are installed.
+
+Oganization: Intelligent Systems Lab, Fayetteville State University (https://www.uncfsu.edu/intelligent-systems-lab)
+PI: Dr. Sambit Bhattacharya
+Author: Matthew Wilkerson
+Date: 2023-12-22
 """
 ##############################################################################################################################################################################
 # Standard library imports
@@ -42,7 +48,7 @@ from torchvision.transforms import GaussianBlur
 
 # Set global variables
 ROOT_DIR = '/home/mwilkers1/Documents/Projects/IMPACT/Edge-AI/IMPACT-Edge_AI/IMG-Classifier_ResNet50-MSL-v2_1/'
-DATA_DIR = 'data'
+DATA_DIR = '/home/mwilkers1/Documents/Projects/IMPACT/Edge-AI/IMPACT-Edge_AI/Img-Classifier_ResNet50-MSL-v2_1/3__data/'
 LABELS_FILE = 'train-set-v2.1.txt'
 IMG_DIR = 'images'
 CLASS_NAMES = ['arm cover', 'other rover part', 'artifact', 'nearby surface', 'close-up rock', 
@@ -380,6 +386,32 @@ def train_model(model, train_loader, val_loader, criterion, optimizer, scheduler
             for inputs, labels in val_loader:
                 outputs, loss, predicted = forward_pass(model, inputs, labels, criterion, device)
                 val_loss += loss.item()
+                c, t = compute_accuracy(predicted, labels, device)  # Pass the 'device' argument to compute_accuracy
+                correct += c
+                total += t
+        val_loss /= len(val_loader)
+        val_accuracy = correct / total
+        return val_loss, val_accuracy
+        """
+        Validate the model on the validation dataset for one epoch.
+
+        Args:
+            model (torch.nn.Module): The model to be validated.
+            val_loader (torch.utils.data.DataLoader): The validation data loader.
+            criterion: The loss function.
+            device (torch.device): The device to perform the validation on.
+
+        Returns:
+            tuple: A tuple containing the validation loss and accuracy.
+        """
+        model.eval()
+        val_loss = 0.0
+        correct = 0
+        total = 0
+        with torch.no_grad():
+            for inputs, labels in val_loader:
+                outputs, loss, predicted = forward_pass(model, inputs, labels, criterion, device)
+                val_loss += loss.item()
                 c, t = compute_accuracy(predicted, labels)
                 correct += c
                 total += t
@@ -505,7 +537,7 @@ def evaluate_model(model, test_loader, criterion, device):
             tuple: A tuple containing the updated loss, correct predictions, and total predictions.
         """
         _, predicted = torch.max(outputs.data, 1)
-        correct += (predicted == labels).sum().item()
+        correct += (predicted == labels.to(device)).sum().item()
         total += labels.size(0)
         all_predicted.extend(predicted.cpu().numpy())
         all_labels.extend(labels.cpu().numpy())
@@ -606,7 +638,7 @@ def main():
     model, optimizer, scheduler, criterion = setup_model_optimizer()
     device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu") 
     model.to(device) # Move model to GPU if available
-    epochs = 25  # Number of epochs to train the model
+    epochs = 50  # Number of epochs to train the model
     patience = 5  # Number of epochs to wait for improvement in validation loss before early stopping
     save_frequency = 5# Frequency (in epochs) at which to save model checkpoints
     # Train the model
