@@ -1,0 +1,8 @@
+Average inference time: 5.678788026173909 milliseconds
+Average CPU usage: 24.841666666666644%
+Average GPU utilization: 39.821666666666665%
+Average GPU memory usage: 1025.6616666666666 MB
+Average IO Time: 0.10668357213338216 milliseconds
+Average Preprocessing Time: 2.255356709162394 milliseconds
+ResNet50 Model Flops: 4.11864 billion Flops
+ResNet50 Model Params: 25.557 million Parameters
