@@ -4,10 +4,8 @@ import os
 import threading
 from io import StringIO
 
-
-DIR = '/home/santino/Desktop/test' # change to correct directory 
-SERVER_ADDRESS = ('192.168.0.21', 16666) # change to correct server IPv4 address
-
+DIR = '/home/XXXXXX/Desktop/test' # change to correct directory 
+SERVER_ADDRESS = ('192.168.0.XX', 16666) # change to correct server IPv4 address
 
 
 def process_data(data_bytes, client_address, total_received):
@@ -51,7 +49,6 @@ def handle_client(client_socket, client_address):
     client_socket.close()
 
 
-
 def start_server():
 
     """
@@ -70,7 +67,5 @@ def start_server():
         threading.Thread(target=handle_client, args=(client_socket, client_address)).start()
 
 
-
 if __name__ == "__main__":
     start_server()
-
