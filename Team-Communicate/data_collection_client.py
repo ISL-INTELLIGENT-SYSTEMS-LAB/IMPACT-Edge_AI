@@ -130,7 +130,7 @@ def update_camera(zed, runtime_parameters, stop, lock):
 
 # Function to send the DataFrame to another device running the server script
 def transmit_data(df, filename):
-    SERVER_ADDRESS = ('192.168.0.21', 16666) # Change to correct server address
+    SERVER_ADDRESS = ('192.168.0.XX', 16666) # Change to correct server address
 
     data = filename + '|||' + df.to_json()
     data_bytes = data.encode()
