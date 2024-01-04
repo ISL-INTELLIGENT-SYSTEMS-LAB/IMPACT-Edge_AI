@@ -50,3 +50,9 @@ Epoch 2/10, Train Loss: 0.2901, Validation Loss: 0.2938, Train Accuracy: 0.9043,
 Training Epoch 3/10
 Epoch 3/10, Train Loss: 0.1424, Validation Loss: 0.1154, Train Accuracy: 0.9520, Validation Accuracy: 0.9618
 Training Epoch 4/10
+Epoch 4/10, Train Loss: 0.0884, Validation Loss: 0.1384, Train Accuracy: 0.9720, Validation Accuracy: 0.9548
+Training Epoch 5/10
+Epoch 5/10, Train Loss: 0.0627, Validation Loss: 0.0884, Train Accuracy: 0.9813, Validation Accuracy: 0.9717
+Training Epoch 6/10
+Epoch 6/10, Train Loss: 0.0516, Validation Loss: 0.0843, Train Accuracy: 0.9824, Validation Accuracy: 0.9725
+Training Epoch 7/10
