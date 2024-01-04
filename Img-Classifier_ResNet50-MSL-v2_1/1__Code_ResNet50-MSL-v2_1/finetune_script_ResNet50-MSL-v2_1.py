@@ -36,6 +36,7 @@ from PIL import Image
 import seaborn as sns
 import matplotlib.pyplot as plt
 from sklearn.metrics import confusion_matrix
+from sklearn.model_selection import KFold
 import tqdm
 # PyTorch and torchvision for deep learning
 import torch
@@ -45,6 +46,7 @@ import torchvision.models as models
 from torchvision import transforms
 from torchvision.models import ResNet50_Weights
 from torchvision.transforms import GaussianBlur
+import numpy as np
 
 # Set global variables
 ROOT_DIR = '/home/mwilkers1/Documents/Projects/IMPACT/Edge-AI/IMPACT-Edge_AI/IMG-Classifier_ResNet50-MSL-v2_1/'
@@ -175,9 +177,11 @@ def get_train_transforms():
         transforms.RandomRotation(degrees=10),
         transforms.RandomResizedCrop(size=256, scale=(0.8, 1.0)),
         transforms.CenterCrop(size=224),
-        transforms.RandomGrayscale(p=0.1),
+        #transforms.RandomGrayscale(p=0.1), # Randomly convert the image to grayscale when using RGB images
+        transforms.Grayscale(num_output_channels=3), # covert to grayscale
         transforms.ToTensor(),
-        transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+        #transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]), # For RGB images
+        transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5]), # For grayscale images
         transforms.RandomErasing(p=0.1, scale=(0.02, 0.33), ratio=(0.3, 3.3)),
     ])
 
@@ -194,8 +198,10 @@ def get_val_test_transforms():
     return transforms.Compose([
         transforms.Resize(256),
         transforms.CenterCrop(224),
+        transforms.Grayscale(num_output_channels=3), # covert to grayscale
         transforms.ToTensor(),
-        transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+        #transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]), # For RGB images
+        transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5]) # For grayscale images
     ])
 
 def create_datasets(root_dir, data_dir, labels_file, img_dir, train_transform, val_test_transform):
@@ -628,43 +634,155 @@ def plot_normalized_confusion_matrix(cm, classes, title='Confusion Matrix (Norma
     plt.yticks(ticks=range(len(classes)), labels=classes, rotation=45)
     plt.show()
 
-def main():
-    # Set up the data loaders   
-    train_transform = get_train_transforms()
-    val_test_transform = get_val_test_transforms()
-    train_dataset, val_dataset, test_dataset = create_datasets(ROOT_DIR, DATA_DIR, LABELS_FILE, IMG_DIR, train_transform, val_test_transform)
-    train_loader, val_loader, test_loader = create_data_loaders(train_dataset, val_dataset, test_dataset)
-    # Set up the model, optimizer, scheduler, and criterion
-    model, optimizer, scheduler, criterion = setup_model_optimizer()
-    device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu") 
-    model.to(device) # Move model to GPU if available
-    epochs = 50  # Number of epochs to train the model
-    patience = 5  # Number of epochs to wait for improvement in validation loss before early stopping
-    save_frequency = 5# Frequency (in epochs) at which to save model checkpoints
-    # Train the model
-    train_losses, val_losses, train_accuracies, val_accuracies = train_model(
-        model=model,
-        train_loader=train_loader,
-        val_loader=val_loader,
-        criterion=criterion,
-        optimizer=optimizer,
-        scheduler=scheduler,
-        device=device,
-        epochs=epochs,
-        patience=patience,
-        save_frequency=save_frequency
-    )
+def main(k=5):
+        # Get the transformations   
+        train_transform = get_train_transforms()
+        val_test_transform = get_val_test_transforms()
 
-    plot_loss(train_losses, val_losses) # Plot the training and validation losses
-    plot_accuracy(train_accuracies, val_accuracies) # Plot the training and validation accuracies
-    # Evaluate the model on the test set
-    conf_matrix, conf_matrix_normalized = evaluate_model(model, test_loader, criterion, device)
-    # Plot the confusion matrices
-    plot_confusion_matrix(conf_matrix, CLASS_NAMES)
-    plot_normalized_confusion_matrix(conf_matrix_normalized, CLASS_NAMES)
-    # Save the model
-    scripted_model = torch.jit.script(model)
-    scripted_model.save('mars_classifier_scripted.pt')
+        # Create datasets
+        train_dataset, val_dataset, test_dataset = create_datasets(ROOT_DIR, DATA_DIR, LABELS_FILE, IMG_DIR, train_transform, val_test_transform)
+
+        # Concatenate train_dataset and val_dataset
+        combined_dataset = torch.utils.data.ConcatDataset([train_dataset, val_dataset])
+        train_dataset = combined_dataset
+
+        # Perform k-fold cross-validation
+        kf = KFold(n_splits=k, shuffle=True)
+        fold = 1
+        all_train_losses = []
+        all_val_losses = []
+        all_train_accuracies = []
+        all_val_accuracies = []
+        
+        best_val_accuracy = 0.0
+        best_model = None
+        
+        for train_index, val_index in kf.split(train_dataset):
+            BATCH_SIZE = 32  # Define the batch size
+
+            print(f"Training on Fold {fold}")
+
+            # Create train and validation data loaders for the current fold
+            train_fold_dataset = torch.utils.data.Subset(train_dataset, train_index)
+            val_fold_dataset = torch.utils.data.Subset(train_dataset, val_index)
+            train_loader = torch.utils.data.DataLoader(train_fold_dataset, batch_size=BATCH_SIZE, shuffle=True)
+            val_loader = torch.utils.data.DataLoader(val_fold_dataset, batch_size=BATCH_SIZE, shuffle=False)
+
+            # Set up the model, optimizer, scheduler, and criterion
+            model, optimizer, scheduler, criterion = setup_model_optimizer()
+            device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu") 
+            model.to(device) # Move model to GPU if available
+
+            epochs = 10  # Number of epochs to train the model
+            patience = 20  # Number of epochs to wait for improvement in validation loss before early stopping
+            save_frequency = 5# Frequency (in epochs) at which to save model checkpoints
+            
+            # Train the model
+            train_losses, val_losses, train_accuracies, val_accuracies = train_model(
+                model=model,
+                train_loader=train_loader,
+                val_loader=val_loader,
+                criterion=criterion,
+                optimizer=optimizer,
+                scheduler=scheduler,
+                device=device,
+                epochs=epochs,
+                patience=patience,
+                save_frequency=save_frequency
+            )
+            
+            all_train_losses.append(train_losses)
+            all_val_losses.append(val_losses)
+            all_train_accuracies.append(train_accuracies)
+            all_val_accuracies.append(val_accuracies)
+            
+            #plot_loss(train_losses, val_losses) # Plot the training and validation losses
+            #plot_accuracy(train_accuracies, val_accuracies) # Plot the training and validation accuracies
+            
+            fold += 1
+            
+            # Save the best model based on validation accuracy
+            current_val_accuracy = max(val_accuracies)
+            if current_val_accuracy > best_val_accuracy:
+                best_val_accuracy = current_val_accuracy
+                best_model_state = model.state_dict()
+                print("Best model updated.")
+                        
+            # Reinitialize the model for the next fold
+            model = None
+        
+        # Calculate average training and validation loss
+        avg_train_loss = np.mean([min(fold_losses) for fold_losses in all_train_losses])
+        avg_val_loss = np.mean([min(fold_losses) for fold_losses in all_val_losses])
+        
+        # Calculate average training and validation accuracy
+        avg_train_accuracy = np.mean([max(fold_accuracies) for fold_accuracies in all_train_accuracies])
+        avg_val_accuracy = np.mean([max(fold_accuracies) for fold_accuracies in all_val_accuracies])
+        
+        # Calculate variability between folds
+        val_accuracy_std = np.std([max(fold_accuracies) for fold_accuracies in all_val_accuracies])
+        
+        print("Average Training Loss:", avg_train_loss)
+        print("Average Validation Loss:", avg_val_loss)
+        print("Average Training Accuracy:", avg_train_accuracy)
+        print("Average Validation Accuracy:", avg_val_accuracy)
+        print("Variability between Folds (Validation Accuracy):", val_accuracy_std)
+
+        # Plotting all training losses
+        plt.figure(figsize=(10, 5))
+        for i, fold_losses in enumerate(all_train_losses):
+            plt.plot(range(1, len(fold_losses) + 1), fold_losses, label=f'Fold {i+1}')
+        plt.title('Training Loss per Fold')
+        plt.xlabel('Epochs')
+        plt.ylabel('Loss')
+        plt.legend()
+        plt.show()
+
+        # Plotting all validation losses
+        plt.figure(figsize=(10, 5))
+        for i, fold_losses in enumerate(all_val_losses):
+            plt.plot(range(1, len(fold_losses) + 1), fold_losses, label=f'Fold {i+1}')
+        plt.title('Validation Loss per Fold')
+        plt.xlabel('Epochs')
+        plt.ylabel('Loss')
+        plt.legend()
+        plt.show()
+
+        # Plotting all training accuracies
+        plt.figure(figsize=(10, 5))
+        for i, fold_accuracies in enumerate(all_train_accuracies):
+            plt.plot(range(1, len(fold_accuracies) + 1), fold_accuracies, label=f'Fold {i+1}')
+        plt.title('Training Accuracy per Fold')
+        plt.xlabel('Epochs')
+        plt.ylabel('Accuracy')
+        plt.legend()
+        plt.show()
+
+        # Plotting all validation accuracies
+        plt.figure(figsize=(10, 5))
+        for i, fold_accuracies in enumerate(all_val_accuracies):
+            plt.plot(range(1, len(fold_accuracies) + 1), fold_accuracies, label=f'Fold {i+1}')
+        plt.title('Validation Accuracy per Fold')
+        plt.xlabel('Epochs')
+        plt.ylabel('Accuracy')
+        plt.legend()
+        plt.show()
+
+        # Load the best model
+        '''loaded_model = models.resnet50(weights=None)
+        num_features = loaded_model.fc.in_features
+        loaded_model.fc = torch.nn.Linear(num_features, 19)
+        loaded_model.load_state_dict(best_model_state)
+                
+        # Evaluate the model on the test set
+        test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=BATCH_SIZE, shuffle=False)
+        conf_matrix, conf_matrix_normalized = evaluate_model(loaded_model, test_loader, criterion, device)
+        
+        # Plot the confusion matrices
+        plot_confusion_matrix(conf_matrix, CLASS_NAMES)
+        plot_normalized_confusion_matrix(conf_matrix_normalized, CLASS_NAMES)
+        
+        print("Finished testing the best model against the test dataset.")'''
 
 if __name__ == '__main__':
-    main()
+        main()
