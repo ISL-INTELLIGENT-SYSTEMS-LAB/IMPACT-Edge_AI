@@ -7,45 +7,16 @@ import time
 import math
 import threading
 import signal
-from datetime import datetime
 import socket
-import pickle 
+import pickle
 
 # Define the directory path and experiment name
-DIR_PATH = "/home/santino/Desktop/collected_data"
-
-# Get the current date and time
-now = datetime.now()
-
-# Format the date and time as strings
-date_str = now.strftime("%Y-%m-%d")
-time_str = now.strftime("%H-%M-%S")
-
-# Use the date as the experiment name
-EXPERIMENT = f'experiment_{date_str}'
-
-# Create a new directory path that includes the experiment name
-EXPERIMENT_DIR_PATH = os.path.join(DIR_PATH, EXPERIMENT)
-
-# Check if the directory exists, if not, create it
-if not os.path.exists(EXPERIMENT_DIR_PATH):
-    os.makedirs(EXPERIMENT_DIR_PATH)
-
-# Create a new directory for the current time
-TIME_DIR_PATH = os.path.join(EXPERIMENT_DIR_PATH, time_str)
-
-# Check if the directory exists, if not, create it
-if not os.path.exists(TIME_DIR_PATH):
-    os.makedirs(TIME_DIR_PATH)
+DIR_PATH = "/home/jetson/impactAI/collected_data"
+EXPERIMENT = 'test_1'
 
 # Function to format the filename based on translation and rotation values
 def format_filename(trans, rot):
-    global file_counter
-    # Add a timestamp and incrementer to the filename
-    timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-    filename = f'{TIME_DIR_PATH}/collection-{file_counter}_{timestamp}_pos_{trans[0]: .2f}-{trans[1]: .2f}-{trans[2]: .2f}+rot_{rot[0]: .2f}-{rot[1]: .2f}-{rot[2]: .2f}'
-    file_counter += 1
-    return filename
+    return f'testFiles-1_pos_{trans[0]: .2f}-{trans[1]: .2f}-{trans[2]: .2f}+rot_{rot[0]: .2f}-{rot[1]: .2f}-{rot[2]: .2f}'
 
 # Function to initialize the camera and set its parameters
 def initialize_camera():
@@ -59,11 +30,11 @@ def initialize_camera():
     init_params.depth_mode = sl.DEPTH_MODE.PERFORMANCE
 
     if zed.open(init_params) != sl.ERROR_CODE.SUCCESS:
-        print("Error opening the camera")
+        print("here1")
         print(repr(status))
         exit()
     else:
-        print("ZED camera initialized successfully")
+        print("here2")
     
     return zed
 
@@ -159,7 +130,7 @@ def update_camera(zed, runtime_parameters, stop, lock):
 
 # Function to send the DataFrame to another device running the server script
 def transmit_data(df, filename):
-    SERVER_ADDRESS = ('192.168.0.21', 16666) # Change to correct server address
+    SERVER_ADDRESS = ('192.168.0.XX', 16666) # Change to correct server address
 
     data = filename + '|||' + df.to_json()
     data_bytes = data.encode()
