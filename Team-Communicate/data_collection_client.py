@@ -7,8 +7,8 @@ import time
 import math
 import threading
 import signal
-import socket #added
-import pickle #added
+import socket
+import pickle
 
 # Define the directory path and experiment name
 DIR_PATH = "/home/jetson/impactAI/collected_data"
