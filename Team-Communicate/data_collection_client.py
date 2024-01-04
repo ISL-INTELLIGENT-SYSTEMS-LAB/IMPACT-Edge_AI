@@ -30,11 +30,11 @@ def initialize_camera():
     init_params.depth_mode = sl.DEPTH_MODE.PERFORMANCE
 
     if zed.open(init_params) != sl.ERROR_CODE.SUCCESS:
-        print("here1")
+        print("Error opening the camera")
         print(repr(status))
         exit()
     else:
-        print("here2")
+        print("ZED camera initialized successfully")
     
     return zed
 
