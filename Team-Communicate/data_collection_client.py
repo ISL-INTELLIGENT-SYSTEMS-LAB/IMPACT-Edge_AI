@@ -8,43 +8,28 @@ import math
 import threading
 import signal
 from datetime import datetime
+import pytz
 import socket
 import pickle 
 
-# Define the directory path and experiment name
-DIR_PATH = "/home/santino/Desktop/collected_data"
+DIR_PATH = "/home/jetson/impactAI/collected_data"
 
-# Get the current date and time
-now = datetime.now()
+# Function to get the current date in the format YYYY-MM-DD
+def get_current_date():
+    return datetime.now().strftime("%Y-%m-%d")
 
-# Format the date and time as strings
-date_str = now.strftime("%Y-%m-%d")
-time_str = now.strftime("%H-%M-%S")
+# Function to create a directory for the current experiment
+def create_directory():
+    experiment = f'experiment_{get_current_date()}'
+    experiment_dir_path = os.path.join(DIR_PATH, experiment)
+    if not os.path.exists(experiment_dir_path):
+        os.makedirs(experiment_dir_path)
+    return experiment_dir_path
 
-# Use the date as the experiment name
-EXPERIMENT = f'experiment_{date_str}'
-
-# Create a new directory path that includes the experiment name
-EXPERIMENT_DIR_PATH = os.path.join(DIR_PATH, EXPERIMENT)
-
-# Check if the directory exists, if not, create it
-if not os.path.exists(EXPERIMENT_DIR_PATH):
-    os.makedirs(EXPERIMENT_DIR_PATH)
-
-# Create a new directory for the current time
-TIME_DIR_PATH = os.path.join(EXPERIMENT_DIR_PATH, time_str)
-
-# Check if the directory exists, if not, create it
-if not os.path.exists(TIME_DIR_PATH):
-    os.makedirs(TIME_DIR_PATH)
-
-# Function to format the filename based on translation and rotation values
+# Function to format the filename for the current experiment
 def format_filename(trans, rot):
-    global file_counter
-    # Add a timestamp and incrementer to the filename
-    timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-    filename = f'{TIME_DIR_PATH}/collection-{file_counter}_{timestamp}_pos_{trans[0]: .2f}-{trans[1]: .2f}-{trans[2]: .2f}+rot_{rot[0]: .2f}-{rot[1]: .2f}-{rot[2]: .2f}'
-    file_counter += 1
+    timestamp = datetime.now(pytz.timezone('US/Eastern')).strftime("%H:%M:%S")
+    filename = f'collection_{timestamp}_pos_{trans[0]: .2f}-{trans[1]: .2f}-{trans[2]: .2f}+rot_{rot[0]: .2f}-{rot[1]: .2f}-{rot[2]: .2f}'
     return filename
 
 # Function to initialize the camera and set its parameters
@@ -119,13 +104,14 @@ def capture_data(zed, runtime_params, objects, obj_runtime_param, point_cloud, i
                 trans = cam_w_pose.get_translation().get()
                 rot = cam_w_pose.get_euler_angles()
                 filename = format_filename(trans, rot)
+                directory = create_directory()
                 zed.retrieve_measure(point_cloud, sl.MEASURE.XYZRGBA, sl.MEM.CPU, display_resolution)
-                point_cloud.write(os.path.join(DIR_PATH, f'{filename}_pointcloud.dat'), sl.MEM.CPU) 
+                point_cloud.write(os.path.join(directory, f'{filename}_pointcloud.dat'), sl.MEM.CPU) 
                 zed.retrieve_image(image_left, sl.VIEW.LEFT, sl.MEM.CPU, display_resolution)
                 image_np = image_left.get_data()
-                cv2.imwrite(os.path.join(DIR_PATH, f'{filename}_image.png'), image_np)
+                cv2.imwrite(os.path.join(directory, f'{filename}_image.png'), image_np)
                 print_zed_location(trans, rot)
-                return objects, filename
+                return objects, filename, directory
     return None, None
 
 # Function to process detected objects and return a DataFrame with their information
@@ -159,7 +145,7 @@ def update_camera(zed, runtime_parameters, stop, lock):
 
 # Function to send the DataFrame to another device running the server script
 def transmit_data(df, filename):
-    SERVER_ADDRESS = ('192.168.0.21', 16666) # Change to correct server address
+    SERVER_ADDRESS = ('192.168.0.XX', 16666) # Change to correct server address
 
     data = filename + '|||' + df.to_json()
     data_bytes = data.encode()
@@ -198,7 +184,7 @@ def main():
         if objects and filename:
             df = process_objects(objects, cam_w_pose)
             transmit_data(df, filename) #sends the DataFrame to the server
-            df.to_csv(os.path.join(DIR_PATH, f'data_exp_{filename}.csv'))
+            df.to_csv(os.path.join(directory, f'{filename}.csv'))
 
         quit = input("Press 'q' to quit or any other key to continue: ")
         if quit.lower() == 'q':
