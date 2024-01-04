@@ -4,12 +4,10 @@ import os
 import threading
 from io import StringIO
 
+DIR = '/home/XXXXXX/Desktop/test' # change to correct directory 
+SERVER_ADDRESS = ('192.168.0.XX', 16666) # change to correct server IPv4 address
 
-DIR = '/home/santino/Desktop/test' # change to correct directory 
-SERVER_ADDRESS = ('192.168.0.21', 16666) # change to correct server IPv4 address
-
-
-
+# Function to process the received data
 def process_data(data_bytes, client_address, total_received):
 
     """
@@ -28,7 +26,7 @@ def process_data(data_bytes, client_address, total_received):
     print(f"\tReceived: {total_received} bytes, {filename}")
     print(f"Client {client_address} disconnected.")
 
-
+# Function to handle a client connection
 def handle_client(client_socket, client_address):
 
     """
@@ -38,7 +36,7 @@ def handle_client(client_socket, client_address):
         client_socket (socket.socket): The socket object associated with the client.
         client_address (tuple): The address of the client.
     """
-
+    
     data_bytes = b''
     total_received = 0
     while True:
@@ -50,8 +48,7 @@ def handle_client(client_socket, client_address):
     process_data(data_bytes, client_address, total_received)
     client_socket.close()
 
-
-
+# Function to start the server
 def start_server():
 
     """
@@ -69,8 +66,5 @@ def start_server():
         client_socket.send(f'Connected to server {SERVER_ADDRESS}...'.encode('ascii'))
         threading.Thread(target=handle_client, args=(client_socket, client_address)).start()
 
-
-
 if __name__ == "__main__":
     start_server()
-
