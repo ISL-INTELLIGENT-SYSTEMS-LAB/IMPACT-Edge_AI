@@ -171,7 +171,7 @@ def main():
             transmit_data(df, filename) #sends the DataFrame to the server
             df.to_csv(os.path.join(DIR_PATH, f'data_exp_{filename}.csv'))
 
-        quit = input("Press 'q' to quit or any other key to continue: ")
+        quit = input("Enter 'q' to quit or any other key to continue: ")
         if quit.lower() == 'q':
             stop[0] = True
             break
