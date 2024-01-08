@@ -9,10 +9,26 @@ import threading
 import signal
 import socket
 import pickle
+from datetime import datetime
 
-# Define the directory path and experiment name
-DIR_PATH = "/home/jetson/Documents/collected_data"
-EXPERIMENT = 'test_1'
+# Function to create a directory for the current experiment
+def create_directory():
+    current_date = datetime.now().strftime("%Y-%m-%d")
+    # Define the base directory path
+    base_dir_path = os.path.join(os.path.expanduser("~"), "Documents")
+    # Create a path to the 'collected_data' directory
+    collected_data_dir_path = os.path.join(base_dir_path, 'collected_data')
+    # Create the 'collected_data' directory if it doesn't exist
+    os.makedirs(collected_data_dir_path, exist_ok=True)
+    # Create a directory for the current experiment inside 'collected_data'
+    experiment = f'experiment_{current_date}'
+    experiment_dir_path = os.path.join(collected_data_dir_path, experiment)
+    # Create the experiment directory if it doesn't exist
+    os.makedirs(experiment_dir_path, exist_ok=True)
+    # Print the path
+    print(f'Data collected will be stored in the {experiment_dir_path} directory.')
+    # Return the path
+    return experiment_dir_path
 
 # Function to format the filename based on translation and rotation values
 def format_filename(trans, rot):
@@ -91,10 +107,10 @@ def capture_data(zed, runtime_params, objects, obj_runtime_param, point_cloud, i
                 rot = cam_w_pose.get_euler_angles()
                 filename = format_filename(trans, rot)
                 zed.retrieve_measure(point_cloud, sl.MEASURE.XYZRGBA, sl.MEM.CPU, display_resolution)
-                point_cloud.write(os.path.join(DIR_PATH, f'{filename}_pointcloud.dat'), sl.MEM.CPU) 
+                point_cloud.write(os.path.join(dir_path, f'{filename}_pointcloud.dat'), sl.MEM.CPU) 
                 zed.retrieve_image(image_left, sl.VIEW.LEFT, sl.MEM.CPU, display_resolution)
                 image_np = image_left.get_data()
-                cv2.imwrite(os.path.join(DIR_PATH, f'{filename}_image.png'), image_np)
+                cv2.imwrite(os.path.join(dir_path, f'{filename}_image.png'), image_np)
                 print_zed_location(trans, rot)
                 return objects, filename
     return None, None
@@ -130,7 +146,11 @@ def update_camera(zed, runtime_parameters, stop, lock):
 
 # Function to send the DataFrame to another device running the server script
 def transmit_data(df, filename):
-    SERVER_ADDRESS = ('192.168.0.XX', 16666) # Change to correct server address
+    ## getting the hostname by socket.gethostname() method
+    hostname = socket.gethostname()
+    ## getting the IP address using socket.gethostbyname() method
+    ip_address = socket.gethostbyname(hostname)
+    SERVER_ADDRESS = (ip_address, 16666) # Change to correct server address
 
     data = filename + '|||' + df.to_json()
     data_bytes = data.encode()
@@ -152,7 +172,8 @@ def transmit_data(df, filename):
 
 # Main function that initializes the camera, sets its parameters, enables positional tracking and object detection,
 # captures data, processes detected objects, and saves their information to CSV files.
-def main():
+def main():    # Create the directory and store the path
+    dir_path = create_directory()
     zed = initialize_camera()
     runtime_params = set_runtime_params()
     enable_positional_tracking(zed)
@@ -169,7 +190,7 @@ def main():
         if objects and filename:
             df = process_objects(objects, cam_w_pose)
             transmit_data(df, filename) #sends the DataFrame to the server
-            df.to_csv(os.path.join(DIR_PATH, f'data_exp_{filename}.csv'))
+            df.to_csv(os.path.join(dir_path, f'data_exp_{filename}.csv'))
 
         quit = input("Enter 'q' to quit or any other key to continue: ")
         if quit.lower() == 'q':
