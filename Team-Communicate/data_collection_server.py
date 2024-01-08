@@ -4,8 +4,19 @@ import os
 import threading
 from io import StringIO
 
-DIR = '/home/XXXXXX/Desktop/test' # change to correct directory 
-SERVER_ADDRESS = ('192.168.0.XX', 16666) # change to correct server IPv4 address
+SERVER_ADDRESS = ('192.168.0.21', 16666) # change to correct server IPv4 address
+
+def create_test_dir():
+    # Get the home directory
+    home_dir = os.path.expanduser("~")
+    # Create a path to the 'test' directory
+    test_dir_path = os.path.join(home_dir, 'test')
+    # Create the directory if it doesn't exist
+    os.makedirs(test_dir_path, exist_ok=True)
+    # Print the path
+    print(f'Data collected will be stored in the {test_dir_path} directory.')
+    # Return the path
+    return test_dir_path
 
 # Function to process the received data
 def process_data(data_bytes, client_address, total_received):
@@ -20,9 +31,6 @@ def process_data(data_bytes, client_address, total_received):
     filename, json_str = data_bytes.decode().split('|||', 1)
     # Convert the JSON string to a DataFrame
     df = pd.read_json(StringIO(json_str))
-    # If the directory does not exist, create it
-    if not os.path.exists(DIR):
-        os.makedirs(DIR)
     # Save the DataFrame to a CSV file
     df.to_csv(os.path.join(DIR, f'{filename}.csv'), index=False)
     # Print a message indicating the total amount of data received and the filename
@@ -39,7 +47,6 @@ def handle_client(client_socket, client_address):
         client_socket (socket.socket): The socket object associated with the client.
         client_address (tuple): The address of the client.
     """
-
     data_bytes = b''
     total_received = 0
     # Loop until no more data is received from the client
@@ -86,4 +93,6 @@ def start_server():
 
 
 if __name__ == "__main__":
+    # Create a test directory
+    DIR = create_test_dir()
     start_server()
