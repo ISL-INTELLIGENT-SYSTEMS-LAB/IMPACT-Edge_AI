@@ -107,10 +107,10 @@ def capture_data(zed, runtime_params, objects, obj_runtime_param, point_cloud, i
                 rot = cam_w_pose.get_euler_angles()
                 filename = format_filename(trans, rot)
                 zed.retrieve_measure(point_cloud, sl.MEASURE.XYZRGBA, sl.MEM.CPU, display_resolution)
-                point_cloud.write(os.path.join(dir_path, f'{filename}_pointcloud.dat'), sl.MEM.CPU) 
+                point_cloud.write(os.path.join(experiment_dir_path, f'{filename}_pointcloud.dat'), sl.MEM.CPU) 
                 zed.retrieve_image(image_left, sl.VIEW.LEFT, sl.MEM.CPU, display_resolution)
                 image_np = image_left.get_data()
-                cv2.imwrite(os.path.join(dir_path, f'{filename}_image.png'), image_np)
+                cv2.imwrite(os.path.join(experiment_dir_path, f'{filename}_image.png'), image_np)
                 print_zed_location(trans, rot)
                 return objects, filename
     return None, None
@@ -173,7 +173,6 @@ def transmit_data(df, filename):
 # Main function that initializes the camera, sets its parameters, enables positional tracking and object detection,
 # captures data, processes detected objects, and saves their information to CSV files.
 def main():    # Create the directory and store the path
-    dir_path = create_directory()
     zed = initialize_camera()
     runtime_params = set_runtime_params()
     enable_positional_tracking(zed)
@@ -190,7 +189,7 @@ def main():    # Create the directory and store the path
         if objects and filename:
             df = process_objects(objects, cam_w_pose)
             transmit_data(df, filename) #sends the DataFrame to the server
-            df.to_csv(os.path.join(dir_path, f'data_exp_{filename}.csv'))
+            df.to_csv(os.path.join(experiment_dir_path, f'data_exp_{filename}.csv'))
 
         quit = input("Enter 'q' to quit or any other key to continue: ")
         if quit.lower() == 'q':
