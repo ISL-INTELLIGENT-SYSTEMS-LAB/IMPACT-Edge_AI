@@ -11,7 +11,7 @@ import socket
 import pickle
 
 # Define the directory path and experiment name
-DIR_PATH = "/home/jetson/impactAI/collected_data"
+DIR_PATH = "/home/jetson/Documents/collected_data"
 EXPERIMENT = 'test_1'
 
 # Function to format the filename based on translation and rotation values
@@ -30,11 +30,11 @@ def initialize_camera():
     init_params.depth_mode = sl.DEPTH_MODE.PERFORMANCE
 
     if zed.open(init_params) != sl.ERROR_CODE.SUCCESS:
-        print("here1")
+        print("Error initiating the ZED camera")
         print(repr(status))
         exit()
     else:
-        print("here2")
+        print("ZED camera initialized successfully")
     
     return zed
 
