@@ -148,12 +148,7 @@ def update_camera(zed, runtime_parameters, stop, lock):
 
 # Function to send the DataFrame to another device running the server script
 def transmit_data(df, filename):
-    ## getting the hostname by socket.gethostname() method
-    hostname = socket.gethostname()
-    ## getting the IP address using socket.gethostbyname() method
-    ip_address = socket.gethostbyname(hostname)
-    SERVER_ADDRESS = (ip_address, 16666) # Change to correct server address
-
+    SERVER_ADDRESS = ('192.168.0.21', 16666) # Change to correct server address
     data = filename + '|||' + df.to_json()
     data_bytes = data.encode()
     
