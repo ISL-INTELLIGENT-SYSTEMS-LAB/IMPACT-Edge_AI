@@ -16,21 +16,19 @@ def create_directory():
     current_date = datetime.now().strftime("%Y-%m-%d")
     # Define the base directory path
     base_dir_path = os.path.join(os.path.expanduser("~"), "Documents")
-    # Create a path to the 'collected_data' directory
-    collected_data_dir_path = os.path.join(base_dir_path, 'collected_data')
-    # Create the 'collected_data' directory if it doesn't exist
-    os.makedirs(collected_data_dir_path, exist_ok=True)
+    # Create a path to the 'collection' directory
+    collection_dir_path = os.path.join(base_dir_path, 'collection')
+    # Create the 'collection' directory if it doesn't exist
+    os.makedirs(collection_dir_path, exist_ok=True)
     # Create a directory for the current experiment inside 'collected_data'
     experiment = f'experiment_{current_date}'
-    experiment_dir_path = os.path.join(collected_data_dir_path, experiment)
+    experiment_dir_path = os.path.join(collection_dir_path, experiment)
     # Create the experiment directory if it doesn't exist
     os.makedirs(experiment_dir_path, exist_ok=True)
     # Print the path
     print(f'Data collected will be stored in the {experiment_dir_path} directory.')
     # Return the path
     return experiment_dir_path
-
-DIR_PATH = create_directory()
 
 # Function to format the filename based on translation and rotation values
 def format_filename(trans, rot):
@@ -170,6 +168,7 @@ def transmit_data(df, filename):
 # Main function that initializes the camera, sets its parameters, enables positional tracking and object detection,
 # captures data, processes detected objects, and saves their information to CSV files.
 def main():
+    DIR_PATH = create_directory()
     zed = initialize_camera()
     runtime_params = set_runtime_params()
     enable_positional_tracking(zed)
