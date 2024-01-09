@@ -1,3 +1,39 @@
+'''
+This script implements a k-fold cross-validation for training and evaluating a image classifier model loaded from Torchvision. The script defines a custom 
+dataset class, transforms for data augmentation, and functions for setting up the model, optimizer, and scheduler. It also includes functions for training 
+the model, performing k-fold cross-validation, and evaluating the model on a test set. The script uses PyTorch and torchvision for deep learning, and sklearn 
+for k-fold cross-validation and evaluation metrics. The main function of the script is the `Main()` function, which orchestrates the training and evaluation 
+process.
+
+Organization: Intelligent Systems Laboratory at Fayetteville State University
+PI: Dr. Sambit Bhattacharya
+Author: Matthew Wilkerson
+
+Update the following:
+    - ROOT_DIR
+    - DATA_DIR
+    - LABELS_FILE
+    - IMG_DIR
+    - CLASS_NAMES
+    - get_train_transforms()
+    - get_val_test_transforms()
+    - setup_model_optimizer()
+        model
+        classes
+        optimizer
+        weight_decay
+        scheduler
+        criterion (loss function)
+    - kfold_cross_validation()
+        kfold
+        epochs
+        patience
+        save_frequency
+    - Main()
+        train_model() (epochs=, patience=, save_frequency=)
+        TorchScript name
+'''
+
 # Standard library imports
 import csv
 import os
@@ -107,7 +143,7 @@ def setup_model_optimizer(): # Set up the model, optimizer, scheduler, and crite
     criterion = torch.nn.CrossEntropyLoss()
     return model, optimizer, scheduler, criterion
 
-def train_model(model, train_loader, val_loader, criterion, optimizer, scheduler, device, epochs, patience, save_frequency):
+def train_model(model, train_loader, val_loader, criterion, optimizer, scheduler, device, epochs=1, patience=5, save_frequency=5):
     
     def forward_pass(model, inputs, labels, criterion, device): 
         inputs, labels = inputs.to(device), labels.to(device)
@@ -417,7 +453,6 @@ def plot_normalized_confusion_matrix(cm, classes, title='Confusion Matrix (Norma
     plt.show()
 
 def main():
-
     # Create datasets
     train_dataset, val_dataset, test_dataset = create_datasets(
         ROOT_DIR, 
