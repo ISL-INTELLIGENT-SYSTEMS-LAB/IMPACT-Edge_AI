@@ -6,17 +6,17 @@ from io import StringIO
 
 SERVER_ADDRESS = ('192.168.0.21', 16666) # change to correct server IPv4 address
 
-def create_test_dir():
+def create_collection_dir():
     # Get the home directory
     home_dir = os.path.expanduser("~")
-    # Create a path to the 'test' directory
-    test_dir_path = os.path.join(home_dir, 'test')
+    # Create a path to the 'collection' directory
+    collection_dir_path = os.path.join(home_dir, 'collection')
     # Create the directory if it doesn't exist
-    os.makedirs(test_dir_path, exist_ok=True)
+    os.makedirs(collection_dir_path, exist_ok=True)
     # Print the path
-    print(f'Data collected will be stored in the {test_dir_path} directory.')
+    print(f"Data collected will be stored in the '{collection_dir_path}' directory.")
     # Return the path
-    return test_dir_path
+    return collection_dir_path
 
 # Function to process the received data
 def process_data(data_bytes, client_address, total_received):
@@ -91,8 +91,7 @@ def start_server():
         threading.Thread(target=handle_client, args=(client_socket, client_address)).start()
 
 
-
 if __name__ == "__main__":
-    # Create a test directory
-    DIR = create_test_dir()
+    # Create a collection directory
+    DIR = create_collection_dir()
     start_server()
