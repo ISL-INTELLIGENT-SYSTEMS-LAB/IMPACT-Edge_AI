@@ -1,0 +1,6 @@
+Average inference time: 62.03550497690836 milliseconds
+Average CPU usage: 85.82700000000007%
+Average IO Time: 2.9569117228190103 milliseconds
+Average Preprocessing Time: 145.39185643196106 milliseconds
+ResNet50 Model Flops: 4.11864 billion Flops
+ResNet50 Model Params: 25.557 million Parameters

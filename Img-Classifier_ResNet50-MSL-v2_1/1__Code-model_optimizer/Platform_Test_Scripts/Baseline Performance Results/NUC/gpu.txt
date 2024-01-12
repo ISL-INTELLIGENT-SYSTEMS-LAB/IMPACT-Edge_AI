@@ -1,0 +1,1 @@
+00:02.0 VGA compatible controller: Intel Corporation JasperLake [UHD Graphics] (rev 01)
