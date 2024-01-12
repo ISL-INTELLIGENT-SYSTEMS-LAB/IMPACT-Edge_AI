@@ -1,0 +1,33 @@
+Training Epoch 1/50
+Epoch 1/50, Train Loss: 0.9171, Validation Loss: 0.5486, Train Accuracy: 0.7278, Validation Accuracy: 0.8431
+Training Epoch 2/50
+Epoch 2/50, Train Loss: 0.4309, Validation Loss: 0.2380, Train Accuracy: 0.8586, Validation Accuracy: 0.9274
+Training Epoch 3/50
+Epoch 3/50, Train Loss: 0.2675, Validation Loss: 0.1357, Train Accuracy: 0.9100, Validation Accuracy: 0.9571
+Training Epoch 4/50
+Epoch 4/50, Train Loss: 0.1955, Validation Loss: 0.1315, Train Accuracy: 0.9287, Validation Accuracy: 0.9625
+Training Epoch 5/50
+Epoch 5/50, Train Loss: 0.1532, Validation Loss: 0.0546, Train Accuracy: 0.9496, Validation Accuracy: 0.9874
+Training Epoch 6/50
+Epoch 6/50, Train Loss: 0.1259, Validation Loss: 0.0784, Train Accuracy: 0.9598, Validation Accuracy: 0.9763
+Training Epoch 7/50
+Epoch 7/50, Train Loss: 0.1053, Validation Loss: 0.0398, Train Accuracy: 0.9671, Validation Accuracy: 0.9915
+Training Epoch 8/50
+Epoch 8/50, Train Loss: 0.0953, Validation Loss: 0.0395, Train Accuracy: 0.9683, Validation Accuracy: 0.9887
+Training Epoch 9/50
+Epoch 9/50, Train Loss: 0.0909, Validation Loss: 0.0381, Train Accuracy: 0.9717, Validation Accuracy: 0.9888
+Training Epoch 10/50
+Epoch 10/50, Train Loss: 0.0893, Validation Loss: 0.0723, Train Accuracy: 0.9726, Validation Accuracy: 0.9834
+Training Epoch 11/50
+Epoch 11/50, Train Loss: 0.0836, Validation Loss: 0.0262, Train Accuracy: 0.9734, Validation Accuracy: 0.9946
+Training Epoch 12/50
+Epoch 12/50, Train Loss: 0.0725, Validation Loss: 0.0354, Train Accuracy: 0.9800, Validation Accuracy: 0.9911
+Training Epoch 13/50
+Epoch 13/50, Train Loss: 0.0772, Validation Loss: 0.0298, Train Accuracy: 0.9755, Validation Accuracy: 0.9929
+Training Epoch 14/50
+Epoch 14/50, Train Loss: 0.0824, Validation Loss: 0.0523, Train Accuracy: 0.9757, Validation Accuracy: 0.9854
+Training Epoch 15/50
+Epoch 15/50, Train Loss: 0.0729, Validation Loss: 0.0269, Train Accuracy: 0.9778, Validation Accuracy: 0.9933
+Training Epoch 16/50
+Early stopping triggered after 16 epochs.
+Test Loss: 0.0277, Test Accuracy: 0.9931

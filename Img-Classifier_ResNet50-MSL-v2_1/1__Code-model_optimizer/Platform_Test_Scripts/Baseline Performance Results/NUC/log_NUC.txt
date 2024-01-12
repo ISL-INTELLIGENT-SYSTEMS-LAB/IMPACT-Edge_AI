@@ -1,0 +1,5 @@
+Average inference time: 579.8677733426102 milliseconds
+Average CPU usage: 99.77262103505831%
+Average IO Time: 1.1703363046025195 milliseconds
+Average Preprocessing Time: 2.8739190459848443 milliseconds
+Average RAM usage: 32.939232053422515%
