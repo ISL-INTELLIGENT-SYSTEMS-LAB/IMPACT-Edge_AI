@@ -6,7 +6,6 @@ import psutil
 import matplotlib.pyplot as plt
 import pynvml
 import time
-from fvcore.nn import FlopCountAnalysis
 
 MDL_PATH = '/home/mwilkers1/Documents/Projects/IMPACT/Edge-AI/IMPACT-Edge_AI/Img-Classifier_ResNet50-MSL-v2_1/2__TorchScript_Saved_Model/99percent-ResNet50-v2.1/mars_classifier_scripted.pt'
 
@@ -93,8 +92,6 @@ print(f"Average GPU memory usage: {sum(gpu_memory) / len(gpu_memory) / (1024**2)
 print(f"Average IO Time: {sum(io_time) / len(io_time) * 1000} milliseconds")
 print(f"Average Preprocessing Time: {sum(prepoc_time) / len(prepoc_time) * 1000} milliseconds")
 print(f"Average RAM usage: {sum(ram_usage) / len(ram_usage)}%")
-print(f"ResNet50 Model Flops: 4.11864 billion Flops")
-print(f"ResNet50 Model Params: 25.557 million Parameters")
 
 # Plotting CPU, GPU, and RAM metrics
 plt.figure(figsize=(12, 4))

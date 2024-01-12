@@ -5,13 +5,14 @@ import os
 import psutil
 import matplotlib.pyplot as plt
 import time
-from jetson_stats import JTop
+from jtop import jtop
 
-MDL_PATH = '/home/mwilkers1/Documents/Projects/IMPACT/Edge-AI/IMPACT-Edge_AI/Img-Classifier_ResNet50-MSL-v2_1/2__TorchScript_Saved_Model/99percent-ResNet50-v2.1/mars_classifier_scripted.pt'
+MDL_PATH = '/home/jetson/impactAI/ResNet50MSL/benchmark/mars_classifier_scripted.pt'
 
 # Load the TorchScript model
 model = torch.jit.load(MDL_PATH)
 model.eval()  # Set the model to evaluation mode
+print("ResNet50-MSL-v2.1 loaded successfully")
 
 # Define the image transformations
 preprocess = transforms.Compose([
@@ -20,7 +21,7 @@ preprocess = transforms.Compose([
 ])
 
 # Directory containing images
-image_directory = '/home/mwilkers1/Documents/Projects/IMPACT/Edge-AI/IMPACT-Edge_AI/Img-Classifier_ResNet50-MSL-v2_1/3__data/images_benchmarking/'
+image_directory = '/home/jetson/impactAI/ResNet50MSL/benchmark/images_benchmarking/'
 image_files = os.listdir(image_directory)
 
 # Metrics storage
@@ -33,10 +34,11 @@ prepoc_time = []
 # Check if a GPU is available and if so, use it
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 model.to(device)
+print(torch.cuda.is_available())
 total_time = 0
 
 # Using jtop context manager to automatically open and close the connection to jtop
-with JTop() as jetson:
+with jtop() as jetson:
     # Loop through images in the directory and make predictions
     for image_name in image_files:
         image_path = os.path.join(image_directory, image_name)
@@ -63,8 +65,8 @@ with JTop() as jetson:
             cpu_usage.append(cpu_percent)
 
             # Get GPU utilization and memory usage from jetson-stats (jtop)
-            gpu_utilization.append(jetson.gpu['val'])  # GPU utilization in percentage
-            gpu_memory.append(jetson.gpu['fb_memory']['used'])       # Used GPU memory in MB
+           # gpu_utilization.append(jetson.gpu['GPU'])  # GPU utilization in percentage
+           # gpu_memory.append(jetson.gpu['RAM']['used'])       # Used GPU memory in MB
 
             # Predict the image class
             with torch.no_grad():  # No need to track gradients for inference
@@ -75,6 +77,7 @@ with JTop() as jetson:
                 
             # The output has unnormalized scores. To get probabilities, you can run a softmax on it.
             probabilities = torch.nn.functional.softmax(output[0], dim=0)
+            print(f"{image_name} done.")
 
         except Exception as e:
             print(f"An error occurred while processing the image '{image_name}': {e}")
@@ -82,12 +85,10 @@ with JTop() as jetson:
 # Print the average inference time, CPU usage, GPU utilization, and IO Time
 print(f"Average inference time: {total_time / len(image_files) * 1000} milliseconds")
 print(f"Average CPU usage: {sum(cpu_usage) / len(cpu_usage)}%")
-print(f"Average GPU utilization: {sum(gpu_utilization) / len(gpu_utilization)}%")
-print(f"Average GPU memory usage: {sum(gpu_memory) / len(gpu_memory) / (1024**2)} MB")
+#print(f"Average GPU utilization: {sum(gpu_utilization) / len(gpu_utilization)}%")
+#print(f"Average GPU memory usage: {sum(gpu_memory) / len(gpu_memory) / (1024**2)} MB")
 print(f"Average IO Time: {sum(io_time) / len(io_time) * 1000} milliseconds")
 print(f"Average Preprocessing Time: {sum(prepoc_time) / len(prepoc_time) * 1000} milliseconds")
-print(f"ResNet50 Model Flops: 4.11864 billion Flops")
-print(f"ResNet50 Model Params: 25.557 million Parameters")
 
 # Plotting CPU and GPU metrics
 plt.figure(figsize=(12, 4))
@@ -113,7 +114,7 @@ plt.plot([mem / (1024**2) for mem in gpu_memory], label='GPU Memory (MB)')
 plt.xlabel('Image Index')
 plt.ylabel('Memory Usage (MB)')
 plt.title('GPU Memory Usage')
-plt.ylim(0, jetson.gpu['fb_memory']['total'])  # Adjust y-axis limit to total GPU memory available
+plt.ylim(0, 4000)  # Adjust y-axis limit to total GPU memory available
 plt.legend()
 
 plt.tight_layout()
